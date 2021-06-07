@@ -4,8 +4,9 @@ import importsensors from "./censors.js"
 
 let sensors = importsensors
 
+import {Sensor} from "./database.js"
 
-import express from "express"
+import express, { response } from "express"
 
 const { PORT = '3000' } = process.env
 const app = express()
@@ -21,84 +22,117 @@ app.listen(PORT)
 
 
 //index get capteur
-app.get('/sensor/:id', function (req, res) {
-    let sensor = sensors.filter((s) => s.id == req.params.id)
-    if (sensor[0]) {
+app.get('/sensor/:id', async function (req, res) {
+
+    try {
+        let sensor = await Sensor.findById(req.params.id)
         res.status(200)
-        res.json(sensor[0])
-    } else {
+        res.json(sensor)
+        
+    } catch (error) {
         res.status(404)
-        res.json({ "err": "Not aviable" })
+        res.json({ "err": error })
     }
+
+
+
 })
 
 //Add add a sensor
 app.post('/sensor/', function (req, res) {
-    let index = sensors.findIndex((elem) => elem.id == req.body.id)
-    if (index == -1) {
-        sensors.push(req.body)
-        res.status(200)
+    let newSensor = new Sensor(req.body)
+    newSensor.save((err)=>{
+        if(err){
+            res.status(201)
+            res.json({
+                "response": "error",
+                "payload": req.body.id
+            })
+        }else{
+            res.status(200)
         res.json({
             "response": "success",
             "payload": req.body.id
         })
-    } else {
-        res.status(201)
-        res.json({
-            "response": "error",
-            "payload": req.body.id
-        })
-    }
+        }
+    })
+    
 
 })
 
 
-app.delete('/sensor/:id', function (req, res) {
-    if (!req.params.id) {
+
+
+//Get all sensors
+app.get('/sensor',async function (req, res) {
+    try {
+     
+    let sensors = await Sensor.find()
+    res.status(200)
+    res.json(sensors)
+   
+    } catch (error) {
         res.status(404)
         res.json({
             "response": "error",
-            "msg": "Provide an Id to delete"
+            "payload": req.params.id
         })
-        return
     }
-    let index = sensors.findIndex((elem) => elem.id == req.params.id)
-    if (index != -1) {
-        sensors.splice(index, 1)
+
+})
+    
+
+
+
+
+
+
+
+
+
+
+
+app.delete('/sensor/:id', async function (req, res) {
+    try {
+        
+        await Sensor.deleteOne({
+            _id:req.params.id
+        })
         res.status(200)
         res.json({
             "response": "success",
             "payload": req.params.id
         })
-    } else {
+        
+    } catch (error) {
         res.status(404)
         res.json({
             "response": "error",
-            "payload": req.params.id
+            "msg": error
         })
     }
+
 
 })
 
 
 
 //update sensor
-app.put('/sensor/:id', function (req, res) {
+app.put('/sensor/:id', async function (req, res) {
+    try {
 
-    let index = sensors.findIndex((elem) => elem.id == req.params.id)
-    if (index != -1) {
-        sensors[index] = {
-            ...sensors[index],
+
+        let sensor = await Sensor.updateOne({
+            _id:req.params.id
+        },{
             ...req.body
-        }
+        })
         res.status(200)
         res.json({
             "response": "success",
             "payload": req.params.id,
-            "test":sensors
         })
-    }
-    else {
+    } catch (error) {
         res.status(404)
         res.json({
             "response": "error",
