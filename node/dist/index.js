@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const database_js_1 = __importDefault(require("./database.js"));
+const database_js_1 = require("./database.js");
 const express_1 = __importDefault(require("express"));
 const { PORT = '3000' } = process.env;
 const app = express_1.default();
@@ -16,7 +16,7 @@ app.listen(PORT);
 //index get capteur
 app.get('/sensor/:id', async function (req, res) {
     try {
-        let sensor = await database_js_1.default.findById(req.params.id);
+        let sensor = await database_js_1.Sensor.findById("" + req.params.id);
         res.status(200);
         res.json(sensor);
     }
@@ -27,13 +27,14 @@ app.get('/sensor/:id', async function (req, res) {
 });
 //Add add a sensor
 app.post('/sensor/', function (req, res) {
-    let newSensor = new database_js_1.default(req.body);
+    let newSensor = new database_js_1.Sensor(req.body);
     newSensor.save((err) => {
         if (err) {
             res.status(201);
             res.json({
                 "response": "error",
-                "payload": req.body.id
+                "payload": req.body.id,
+                "err": err
             });
         }
         else {
@@ -48,7 +49,7 @@ app.post('/sensor/', function (req, res) {
 //Get all sensors
 app.get('/sensor', async function (req, res) {
     try {
-        let sensors = await database_js_1.default.find();
+        let sensors = await database_js_1.Sensor.find();
         res.status(200);
         res.json(sensors);
     }
@@ -61,7 +62,7 @@ app.get('/sensor', async function (req, res) {
 });
 app.delete('/sensor/:id', async function (req, res) {
     try {
-        await database_js_1.default.deleteOne({
+        await database_js_1.Sensor.deleteOne({
             _id: req.params.id
         });
         res.status(200);
@@ -81,7 +82,7 @@ app.delete('/sensor/:id', async function (req, res) {
 //update sensor
 app.put('/sensor/:id', async function (req, res) {
     try {
-        let sensor = await database_js_1.default.updateOne({
+        let sensor = await database_js_1.Sensor.updateOne({
             _id: req.params.id
         }, {
             ...req.body

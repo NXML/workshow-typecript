@@ -1,8 +1,15 @@
 import  mongoose from "mongoose"
 
 
+mongoose.connection.on('connected', function() {
+    console.log('Connection established to MongoDB');
+});
 
-mongoose.connect('mongodb://root:example@mongo:27017/',{ useNewUrlParser: true , useUnifiedTopology: true } );
+const dbURI = "mongodb://root:example@mongo:27017/"
+
+
+
+mongoose.connect(dbURI,{ useNewUrlParser: true , useUnifiedTopology: true } );
 
 interface ISensor {
     _id : String,
@@ -20,4 +27,4 @@ const sensorSchema = new mongoose.Schema<ISensor>({
 const Sensor = mongoose.model('Sensor', sensorSchema);
 
 
-export default Sensor
+export {Sensor} 
