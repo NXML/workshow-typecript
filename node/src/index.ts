@@ -1,12 +1,10 @@
 
 
-import importsensors from "./censors.js"
+// let sensors = importsensors
 
-let sensors = importsensors
+import Sensor from "./database.js"
 
-import {Sensor} from "./database.js"
-
-import express, { response } from "express"
+import express from "express"
 
 const { PORT = '3000' } = process.env
 const app = express()
@@ -41,7 +39,7 @@ app.get('/sensor/:id', async function (req, res) {
 //Add add a sensor
 app.post('/sensor/', function (req, res) {
     let newSensor = new Sensor(req.body)
-    newSensor.save((err)=>{
+    newSensor.save((err:any)=>{
         if(err){
             res.status(201)
             res.json({
@@ -64,7 +62,7 @@ app.post('/sensor/', function (req, res) {
 
 
 //Get all sensors
-app.get('/sensor',async function (req, res) {
+app.get('/sensor',async function (req , res) {
     try {
      
     let sensors = await Sensor.find()
@@ -74,8 +72,7 @@ app.get('/sensor',async function (req, res) {
     } catch (error) {
         res.status(404)
         res.json({
-            "response": "error",
-            "payload": req.params.id
+            "response": "error"
         })
     }
 
